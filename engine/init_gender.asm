@@ -46,7 +46,7 @@ InitGender: ; 48dcb (12:4dcb)
 .MenuDataHeader: ; 0x48dfc
 	db $40 ; flags
 	db 04, 06 ; start coords
-	db 09, 12 ; end coords
+	db 09, 13 ; end coords
 	dw .MenuData2
 	db 1 ; default option
 ; 0x48e04
@@ -54,8 +54,8 @@ InitGender: ; 48dcb (12:4dcb)
 .MenuData2: ; 0x48e04
 	db $a1 ; flags
 	db 2 ; items
-	db "Boy@"
-	db "Girl@"
+	db "Left@"
+	db "Right@"
 ; 0x48e0f
 
 TextJump_AreYouABoyOrAreYouAGirl: ; 0x48e0f
@@ -80,16 +80,60 @@ InitGenderScreen: ; 48e14 (12:4e14)
 	ld bc, SCREEN_HEIGHT * SCREEN_WIDTH
 	ld a, $0
 	call ByteFill
+
 	hlcoord 0, 0, AttrMap
 	ld bc, SCREEN_HEIGHT * SCREEN_WIDTH
+	ld a, 1
+	call ByteFill
+
+  hlcoord 0, 3, AttrMap
+	ld bc, 7
 	xor a
 	call ByteFill
+  hlcoord 0, 4, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+  hlcoord 0, 5, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+  hlcoord 0, 6, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+  hlcoord 0, 7, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+  hlcoord 0, 8, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+  hlcoord 0, 9, AttrMap
+	ld bc, 7
+	xor a
+	call ByteFill
+
+; hackerdehack
+	ld a, 0
+	ld [hGraphicStartTile], a
+	hlcoord 0, 3
+	lb bc, 7, 7
+	predef PlaceGraphic
+
+	ld a, 49
+	ld [hGraphicStartTile], a
+	hlcoord 13, 3
+	lb bc, 7, 7
+	predef PlaceGraphic
+
 	ret
 
 LoadGenderScreenPal: ; 48e47 (12:4e47)
 	ld hl, .Palette
 	ld de, UnknBGPals
-	ld bc, 1 palettes
+	ld bc, 2 palettes
 	ld a, $5
 	call FarCopyWRAM
 	callba ApplyPals
@@ -97,10 +141,15 @@ LoadGenderScreenPal: ; 48e47 (12:4e47)
 ; 48e5c (12:4e5c)
 
 .Palette: ; 48e5c
-	RGB 31, 31, 31
-	RGB 09, 30, 31
-	RGB 01, 11, 31
-	RGB 00, 00, 00
+	RGB $1f, $1f, $1f
+	RGB $19, $12, $0c
+	RGB $16, $09, $05
+	RGB $00, $00, $00
+
+	RGB $1f, $1f, $1f
+	RGB $1b, $11, $0e
+	RGB $07, $05, $1f
+	RGB $00, $00, $00
 ; 48e64
 
 LoadGenderScreenLightBlueTile: ; 48e64 (12:4e64)
@@ -108,6 +157,19 @@ LoadGenderScreenLightBlueTile: ; 48e64 (12:4e64)
 	ld hl, VTiles2 tile $00
 	lb bc, BANK(.LightBlueTile), 1
 	call Get2bpp
+; hackety hack
+	ld de, ChrisPic
+	ld hl, VTiles2 tile 0
+	ld b, BANK(ChrisPic) ; BANK(KrisPic)
+	ld c, 7 * 7 ; dimensions
+	call Get2bpp
+
+	ld de, KrisPic
+	ld hl, VTiles2 tile 49
+	ld b, BANK(KrisPic) ; BANK(KrisPic)
+	ld c, 7 * 7 ; dimensions
+	call Get2bpp
+
 	ret
 ; 48e71 (12:4e71)
 

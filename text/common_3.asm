@@ -340,8 +340,8 @@ Text_YouCantUseItInABattle::
 	prompt
 
 Text_AreYouABoyOrAreYouAGirl::
-	text "Are you a boy?"
-	line "Or are you a girl?"
+	text "Please choose"
+	line "your style."
 	done
 
 UnknownText_0x1c0cc6::
