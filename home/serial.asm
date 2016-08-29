@@ -1,93 +1,41 @@
 Serial:: ; 6ef
 ; The serial interrupt.
-
-	push af
-	push bc
-	push de
-	push hl
-
-	ld a, [hMobileReceive]
-	and a
-	jr nz, .mobile
-
-	ld a, [wPrinterConnectionOpen]
-	bit 0, a
-	jr nz, .printer
-
-	ld a, [hLinkPlayerNumber]
-	inc a ; is it equal to -1?
-	jr z, .init_player_number
-
-	ld a, [rSB]
-	ld [hSerialReceive], a
-
-	ld a, [hSerialSend]
-	ld [rSB], a
-
-	ld a, [hLinkPlayerNumber]
-	cp $2
-	jr z, .player2
-
-	ld a, 0 << rSC_ON
-	ld [rSC], a
-	ld a, 1 << rSC_ON
-	ld [rSC], a
-	jr .player2
-
-.mobile
-	call MobileReceive
-	jr .end
-
-.printer
-	call PrinterReceive
-	jr .end
-
-.init_player_number
-	ld a, [rSB]
-	cp $1
-	jr z, .player1
-	cp $2
-	jr nz, .player2
-
-.player1
-	ld [hSerialReceive], a
-	ld [hLinkPlayerNumber], a
-	cp $2
-	jr z, ._player2
-
-	xor a
-	ld [rSB], a
-	ld a, $3
-	ld [rDIV], a
-
-.wait_bit_7
-	ld a, [rDIV]
-	bit 7, a
-	jr nz, .wait_bit_7
-
-	ld a, 0 << rSC_ON
-	ld [rSC], a
-	ld a, 1 << rSC_ON
-	ld [rSC], a
-	jr .player2
-
-._player2
-	xor a
-	ld [rSB], a
-
-.player2
-	ld a, $1
-	ld [hFFCA], a
-	ld a, $fe
-	ld [hSerialSend], a
-
-.end
-	pop hl
-	pop de
-	pop bc
-	pop af
 	reti
 ; 75f
+
+; b - register
+; c - value
+WriteRegister::
+  ld a, b
+  or %01000000 ; write, increment
+  and %01111111
+  call SPITransfer
+  ld a, c
+  call SPITransfer
+  ret
+
+; b - register
+; c - return value
+ReadRegister::
+  ld a, b
+  or %11000000 ; read, increment
+  call SPITransfer
+  xor a ; 0
+  call SPITransfer
+  ld c, a
+  ret
+  
+; a - value
+SPITransfer::
+  ld [rSB], a
+  ld a, $81
+  ld [rSC], a
+.wait
+  ld a, [rSC]
+  bit 7, a
+  jr nz, .wait
+  ld a, [rSB]
+  ret
 
 Function75f:: ; 75f
 	ld a, $1

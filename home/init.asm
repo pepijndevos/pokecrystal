@@ -164,6 +164,47 @@ Init:: ; 17d
 	ld [rIE], a
 	ei
 
+.sensor_wait
+	call DelayFrame ; raise CS
+
+	ld a, LIS3DH_REG_WHOAMI
+	ld b, a
+	call ReadRegister
+	ld a, c
+	cp a, $33
+	jp nz, .sensor_wait
+
+	call DelayFrame ; raise CS
+
+	; based on application note section 6.3.2-3
+	ld a, LIS3DH_REG_CTRL1
+	ld b, a
+	ld a, $77 ; CTRL1: enable all axes, 400HZ
+	ld c, a
+	call WriteRegister
+	ld a, $0F ; CTRL2: high-pass filter on everything
+	call SPITransfer
+	ld a, $00 ; CTRL3: not used
+	call SPITransfer
+	ld a, $88 ; CTRL4: BDU, high resolution, 2g
+	call SPITransfer
+	ld a, $08 ; CTRL5: latch interrupt on INT1_SRC 
+	call SPITransfer
+
+	call DelayFrame ; raise CS
+
+	ld a, LIS3DH_REG_INT1CFG
+	ld b, a
+	ld a, %00101010 ; int1 config: enable high int on all axes
+	ld c, a
+	call WriteRegister
+	ld a, 0 ; src
+	call SPITransfer
+	ld a, 4 ; threshold
+	call SPITransfer
+	ld a, 0 ; minimum duration
+	call SPITransfer
+
 	call DelayFrame
 
 	predef InitSGBBorder ; SGB init

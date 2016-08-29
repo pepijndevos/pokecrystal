@@ -52,6 +52,8 @@ DoPlayerMovement:: ; 80000
 	ret c
 	call .CheckTurning
 	ret c
+	call .CheckSensor
+	ret c
 	call .TryStep
 	ret c
 	call .TryJump
@@ -66,6 +68,8 @@ DoPlayerMovement:: ; 80000
 	call .CheckTile
 	ret c
 	call .CheckTurning
+	ret c
+	call .CheckSensor
 	ret c
 	call .TrySurf
 	ret c
@@ -445,6 +449,20 @@ DoPlayerMovement:: ; 80000
 .EdgeWarps:
 	db $70, $78, $76, $7e
 ; 8025f
+
+.CheckSensor:
+; read sensor
+  ld a, LIS3DH_REG_INT1SRC
+  ld b, a
+  call ReadRegister
+  bit 6, c
+  jr z, .noInt
+	xor a
+	ret
+.noInt
+  call .StandInPlace
+	scf
+	ret
 
 .DoStep:
 	ld e, a
