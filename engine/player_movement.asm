@@ -14,7 +14,10 @@ DoPlayerMovement:: ; 80000
 .GetDPad:
 
 	ld a, [hJoyDown]
+  and a
+  jp z, .noInput
 	ld [CurInput], a
+.noInput
 
 ; Standing downhill instead moves down.
 

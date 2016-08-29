@@ -1648,7 +1648,6 @@ wd03b:: ds 3
 
 MenuItemsList::
 CurFruitTree::
-CurInput::
 wElevatorPointerBank::
 wCurCoordEventTriggerID::
 wCurSignpostYCoord::
@@ -2014,6 +2013,7 @@ TilesetAnim:: ; d1e2
 ; bank 3f
 	ds 2
 ; unused ; d1e4
+CurInput::
 	ds 2
 TilesetPalettes:: ; d1e6
 ; bank 3f
